@@ -32,7 +32,7 @@ public class FoodService {
         var account = accountRepository.findBySubject(subject);
         var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
         if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, "This account is not allowed to access this home");
+            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
         }
 
         var foodEntityList = foodRepository.findAllByHomeId(homeId);
@@ -135,7 +135,6 @@ public class FoodService {
         }
 
         foodRepository.deleteAllById(ids);
-        log.info("Delete multiple food done!");
     }
 
     private FoodResponse generateFoodResponse(FoodEntity foodEntity, AccountEntity updateBy) {

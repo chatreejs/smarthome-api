@@ -19,4 +19,6 @@ public class WarrantyResponse {
     private String purchaseDate;
     private String warrantyDate;
     private WarrantyStatus status;
+    private String updateBy;
+    private String updateDate;
 }

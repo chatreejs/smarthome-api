@@ -32,7 +32,7 @@ public class InventoryService {
         var account = accountRepository.findBySubject(subject);
         var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
         if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, "This account is not allowed to access this home");
+            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
         }
 
         var inventoryEntityList = inventoryRepository.findAllByHomeIdAndOrderByQuantityAsc(homeId);
@@ -63,7 +63,7 @@ public class InventoryService {
         var account = accountRepository.findBySubject(subject);
         var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
         if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, "This account is not allowed to access this home");
+            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
         }
 
         var inventoryEntity = inventoryRepository.findByIdAndHomeId(id, homeId);

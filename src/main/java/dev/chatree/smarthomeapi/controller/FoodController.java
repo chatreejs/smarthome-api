@@ -51,25 +51,24 @@ public class FoodController {
 
     @PostMapping
     public ResponseEntity<Objects> createFood(@RequestParam("homeId") Long homeId,
-                                              @RequestBody FoodRequest foodRequest,
+                                              @RequestBody FoodRequest food,
                                               Authentication auth,
                                               HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-
         var subject = auth.getName();
-        foodService.createFood(foodRequest, homeId, subject);
+        foodService.createFood(food, homeId, subject);
         return ResponseEntity.created(null).build();
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Objects> updateFood(@PathVariable Long id,
                                               @RequestParam("homeId") Long homeId,
-                                              @RequestBody FoodRequest foodRequest,
+                                              @RequestBody FoodRequest food,
                                               Authentication auth,
                                               HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
         var subject = auth.getName();
-        foodService.updateFood(id, foodRequest, homeId, subject);
+        foodService.updateFood(id, food, homeId, subject);
         return ResponseEntity.ok().build();
     }
 
@@ -87,8 +86,8 @@ public class FoodController {
 
     @DeleteMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public ResponseEntity<Objects> deleteMultipleFood(@RequestParam("homeId") Long homeId,
-                                                      Authentication auth,
                                                       String ids,
+                                                      Authentication auth,
                                                       HttpServletRequest request) throws BusinessException {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
         if (ids.isBlank()) {

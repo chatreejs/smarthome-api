@@ -83,8 +83,8 @@ public class InventoryController {
 
     @DeleteMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public ResponseEntity<Objects> deleteInventory(@RequestParam("homeId") Long homeId,
-                                                   Authentication auth,
                                                    String ids,
+                                                   Authentication auth,
                                                    HttpServletRequest request) throws BusinessException {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
         if (ids.isBlank()) {

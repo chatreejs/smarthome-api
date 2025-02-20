@@ -49,7 +49,6 @@ public class HomeService {
                     .build();
             homeResponseList.add(homeResponse);
         }
-        log.info("Get home by user id done!");
         return homeResponseList;
     }
 
@@ -67,7 +66,6 @@ public class HomeService {
         account.setHomes(homeEntitySet);
         accountRepository.save(account);
 
-        log.info("Create home done!");
         return HomeResponse.builder()
                 .id(homeEntity.getId())
                 .name(homeEntity.getName())

@@ -26,66 +26,74 @@ public class WarrantyController {
     private final WarrantyService warrantyService;
 
     @GetMapping
-    public ResponseEntity<List<WarrantyResponse>> getAllWarranty(Authentication auth,
+    public ResponseEntity<List<WarrantyResponse>> getAllWarranty(@RequestParam("homeId") Long homeId,
+                                                                 Authentication auth,
                                                                  HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-        return ResponseEntity.ok(warrantyService.getAllWarranty());
+        var subject = auth.getName();
+        var warrantyResponseList = warrantyService.getAllWarranty(homeId, subject);
+        return ResponseEntity.ok(warrantyResponseList);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<WarrantyResponse> getWarrantyById(@PathVariable Long id,
+    public ResponseEntity<WarrantyResponse> getWarrantyById(@RequestParam("homeId") Long homeId,
+                                                            @PathVariable Long id,
                                                             Authentication auth,
                                                             HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-        var warrantyResponse = warrantyService.getWarrantyById(id);
+        var subject = auth.getName();
+        var warrantyResponse = warrantyService.getWarrantyById(id, homeId, subject);
         return ResponseEntity.ok(warrantyResponse);
     }
 
     @PostMapping
-    public ResponseEntity<Objects> createWarranty(@RequestBody WarrantyRequest warranty,
+    public ResponseEntity<Objects> createWarranty(@RequestParam("homeId") Long homeId,
+                                                  @RequestBody WarrantyRequest warranty,
                                                   Authentication auth,
                                                   HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-        warrantyService.createWarranty(warranty);
+        var subject = auth.getName();
+        warrantyService.createWarranty(warranty, homeId, subject);
         return ResponseEntity.created(null).build();
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Objects> updateWarranty(@PathVariable Long id,
+                                                  @RequestParam("homeId") Long homeId,
                                                   @RequestBody WarrantyRequest warranty,
                                                   Authentication auth,
                                                   HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-        warrantyService.updateWarranty(id, warranty);
+        var subject = auth.getName();
+        warrantyService.updateWarranty(id, warranty, homeId, subject);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Objects> deleteWarranty(@PathVariable Long id,
+                                                  @RequestParam("homeId") Long homeId,
                                                   Authentication auth,
                                                   HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-        warrantyService.deleteWarranty(id);
+        var subject = auth.getName();
+        warrantyService.deleteWarranty(id, homeId, subject);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
-    public ResponseEntity<Objects> deleteWarranty(@RequestParam String ids,
-                                                  HttpServletRequest request,
-                                                  Authentication auth) throws BusinessException {
+    public ResponseEntity<Objects> deleteWarranty(@RequestParam("homeId") Long homeId,
+                                                  String ids,
+                                                  Authentication auth,
+                                                  HttpServletRequest request) throws BusinessException {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
         if (ids.isBlank()) {
-            log.info("Error: ids must not be blank");
             throw new BusinessException("ids must not be blank");
         }
 
         var idStringList = List.of(ids.split(","));
-        try {
-            var idList = idStringList.stream().map(Long::parseLong).toList();
-            warrantyService.deleteMultipleWarranty(idList);
-            return ResponseEntity.noContent().build();
-        } catch (NumberFormatException e) {
-            throw new BusinessException("ids must be a number");
-        }
+        var subject = auth.getName();
+        var idList = idStringList.stream().map(Long::parseLong).toList();
+        warrantyService.deleteMultipleWarranty(idList, homeId, subject);
+        return ResponseEntity.noContent().build();
     }
 }
