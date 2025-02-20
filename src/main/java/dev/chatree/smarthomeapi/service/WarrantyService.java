@@ -26,32 +26,28 @@ public class WarrantyService {
     }
 
     public List<WarrantyResponse> getAllWarranty() {
-        List<WarrantyEntity> warrantyEntityList = warrantyRepository.findAllByOrderByWarrantyDateAsc();
-        List<WarrantyResponse> warrantyResponseList = new ArrayList<>();
+        var warrantyEntityList = warrantyRepository.findAllByOrderByWarrantyDateAsc();
+        var warrantyResponseList = new ArrayList<WarrantyResponse>();
 
         for (WarrantyEntity warrantyEntity : warrantyEntityList) {
-            WarrantyResponse warrantyResponse = generateWarrantyResponse(warrantyEntity);
+            var warrantyResponse = generateWarrantyResponse(warrantyEntity);
             warrantyResponseList.add(warrantyResponse);
         }
 
-        log.info("Get all warranty done!");
         return warrantyResponseList;
     }
 
     public WarrantyResponse getWarrantyById(Long id) {
-        WarrantyEntity warrantyEntity = warrantyRepository.findById(id).orElse(null);
+        var warrantyEntity = warrantyRepository.findById(id).orElse(null);
         if (warrantyEntity == null) {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Warranty not found");
         }
 
-        WarrantyResponse warrantyResponse = generateWarrantyResponse(warrantyEntity);
-
-        log.info("Get warranty by id done!");
-        return warrantyResponse;
+        return generateWarrantyResponse(warrantyEntity);
     }
 
     public void createWarranty(WarrantyRequest warrantyRequest) {
-        WarrantyEntity warrantyEntity = new WarrantyEntity();
+        var warrantyEntity = new WarrantyEntity();
         warrantyEntity.setBrand(warrantyRequest.getBrand());
         warrantyEntity.setProductName(warrantyRequest.getProductName());
         warrantyEntity.setProductNumber(warrantyRequest.getProductNumber());
@@ -61,11 +57,10 @@ public class WarrantyService {
         warrantyEntity.setWarrantyDate(LocalDate.parse(warrantyRequest.getWarrantyDate(), DateTimeFormatter.ISO_DATE));
 
         warrantyRepository.save(warrantyEntity);
-        log.info("Create warranty done!");
     }
 
     public void updateWarranty(Long id, WarrantyRequest warrantyRequest) {
-        WarrantyEntity warrantyEntity = warrantyRepository.findById(id).orElse(null);
+        var warrantyEntity = warrantyRepository.findById(id).orElse(null);
         if (warrantyEntity == null) {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Warranty not found");
         }
@@ -78,38 +73,32 @@ public class WarrantyService {
         warrantyEntity.setWarrantyDate(LocalDate.parse(warrantyRequest.getWarrantyDate(), DateTimeFormatter.ISO_DATE));
 
         warrantyRepository.save(warrantyEntity);
-        log.info("Update warranty done!");
     }
 
     public void deleteWarranty(Long id) {
-        log.info("id: {}", id);
-        WarrantyEntity warrantyEntity = warrantyRepository.findById(id).orElse(null);
+        var warrantyEntity = warrantyRepository.findById(id).orElse(null);
         if (warrantyEntity == null) {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Warranty not found");
         }
         warrantyRepository.delete(warrantyEntity);
-        log.info("Delete warranty done!");
     }
 
     public void deleteMultipleWarranty(List<Long> ids) {
-        log.info("ids: {}", ids);
         warrantyRepository.deleteAllById(ids);
-        log.info("Delete multiple warranty done!");
     }
 
     private WarrantyResponse generateWarrantyResponse(WarrantyEntity warrantyEntity) {
-        WarrantyResponse warrantyResponse = new WarrantyResponse();
-        warrantyResponse.setId(warrantyEntity.getId());
-        warrantyResponse.setBrand(warrantyEntity.getBrand());
-        warrantyResponse.setProductName(warrantyEntity.getProductName());
-        warrantyResponse.setProductNumber(warrantyEntity.getProductNumber());
-        warrantyResponse.setModel(warrantyEntity.getModel());
-        warrantyResponse.setSerialNumber(warrantyEntity.getSerialNumber());
-        warrantyResponse.setPurchaseDate(warrantyEntity.getPurchaseDate().toString());
-        warrantyResponse.setWarrantyDate(warrantyEntity.getWarrantyDate().toString());
-        warrantyResponse.setStatus(generateWarrantyStatus(warrantyEntity.getWarrantyDate()));
-
-        return warrantyResponse;
+        return WarrantyResponse.builder()
+                .id(warrantyEntity.getId())
+                .brand(warrantyEntity.getBrand())
+                .productName(warrantyEntity.getProductName())
+                .productNumber(warrantyEntity.getProductNumber())
+                .model(warrantyEntity.getModel())
+                .serialNumber(warrantyEntity.getSerialNumber())
+                .purchaseDate(warrantyEntity.getPurchaseDate().toString())
+                .warrantyDate(warrantyEntity.getWarrantyDate().toString())
+                .status(generateWarrantyStatus(warrantyEntity.getWarrantyDate()))
+                .build();
     }
 
     private WarrantyStatus generateWarrantyStatus(LocalDate warrantyDate) {

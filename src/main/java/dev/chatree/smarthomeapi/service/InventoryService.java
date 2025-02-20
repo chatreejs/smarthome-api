@@ -56,7 +56,6 @@ public class InventoryService {
             var inventoryResponse = generateInventoryResponse(inventoryEntity, updateBy);
             inventoryResponseList.add(inventoryResponse);
         }
-        log.info("Get all inventory done!");
         return inventoryResponseList;
     }
 
@@ -77,10 +76,7 @@ public class InventoryService {
             updateBy = inventoryEntity.getCreateBy();
         }
 
-        var inventoryResponse = generateInventoryResponse(inventoryEntity, updateBy);
-
-        log.info("Get inventory by id done!");
-        return inventoryResponse;
+        return generateInventoryResponse(inventoryEntity, updateBy);
     }
 
     public void createInventory(InventoryRequest inventoryRequest, Long homeId, String subject) {
@@ -102,7 +98,6 @@ public class InventoryService {
         inventoryEntity.setHome(homeEntity);
 
         inventoryRepository.save(inventoryEntity);
-        log.info("Create inventory done!");
     }
 
     public void updateInventory(Long id, InventoryRequest inventoryRequest, Long homeId, String subject) {
@@ -126,7 +121,6 @@ public class InventoryService {
         inventoryEntity.setUpdateBy(account);
 
         inventoryRepository.save(inventoryEntity);
-        log.info("Update inventory done!");
     }
 
     public void deleteInventory(Long id, Long homeId, String subject) {
@@ -142,7 +136,6 @@ public class InventoryService {
         }
 
         inventoryRepository.deleteById(id);
-        log.info("Delete inventory done!");
     }
 
     public void deleteMultipleInventory(List<Long> ids, Long homeId, String subject) {
@@ -153,7 +146,6 @@ public class InventoryService {
         }
 
         inventoryRepository.deleteAllById(ids);
-        log.info("Delete multiple inventory done!");
     }
 
     private InventoryResponse generateInventoryResponse(InventoryEntity inventoryEntity, AccountEntity updateBy) {

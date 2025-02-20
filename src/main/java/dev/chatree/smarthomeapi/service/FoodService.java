@@ -46,7 +46,6 @@ public class FoodService {
             var foodResponse = generateFoodResponse(foodEntity, updateBy);
             foodResponseList.add(foodResponse);
         }
-        log.info("Get all food done!");
         return foodResponseList;
     }
 
@@ -66,9 +65,7 @@ public class FoodService {
         if (updateBy == null) {
             updateBy = foodEntity.getCreateBy();
         }
-        var foodResponse = generateFoodResponse(foodEntity, updateBy);
-        log.info("Get food by id done!");
-        return foodResponse;
+        return generateFoodResponse(foodEntity, updateBy);
     }
 
     public void createFood(FoodRequest foodRequest, Long homeId, String subject) {
@@ -90,7 +87,6 @@ public class FoodService {
         foodEntity.setHome(homeEntity);
 
         foodRepository.save(foodEntity);
-        log.info("Create food done!");
     }
 
     public void updateFood(Long id, FoodRequest foodRequest, Long homeId, String subject) {
@@ -114,7 +110,6 @@ public class FoodService {
         foodEntity.setExpiryDate(LocalDate.parse(foodRequest.getExpiryDate(), DateTimeFormatter.ISO_DATE));
 
         foodRepository.save(foodEntity);
-        log.info("Update food done!");
     }
 
     public void deleteFood(Long id, Long homeId, String subject) {
@@ -130,7 +125,6 @@ public class FoodService {
         }
 
         foodRepository.delete(foodEntity);
-        log.info("Delete food done!");
     }
 
     public void deleteMultipleFood(List<Long> ids, Long homeId, String subject) {

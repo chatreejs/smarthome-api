@@ -34,7 +34,7 @@ public class AccountService {
 
         List<HomeEntity> homeEntities = homeRepository.findByAccountsId(accountEntity.getId());
 
-        AccountResponse accountResponse = AccountResponse.builder()
+        return AccountResponse.builder()
                 .id(accountEntity.getId())
                 .username(accountEntity.getUsername())
                 .firstName(accountEntity.getFirstName())
@@ -42,9 +42,6 @@ public class AccountService {
                 .email(accountEntity.getEmail())
                 .hasHome(!homeEntities.isEmpty())
                 .build();
-
-        log.info("Get account by subject done!");
-        return accountResponse;
     }
 
     public AccountEntity getAccountBySubject(String subject) {
@@ -52,7 +49,6 @@ public class AccountService {
         if (accountEntity == null) {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Account not found");
         }
-        log.info("Get account by subject done!");
         return accountEntity;
     }
 
@@ -65,6 +61,5 @@ public class AccountService {
         accountEntity.setEmail(accountRequest.getEmail());
 
         accountRepository.save(accountEntity);
-        log.info("Create account done!");
     }
 }

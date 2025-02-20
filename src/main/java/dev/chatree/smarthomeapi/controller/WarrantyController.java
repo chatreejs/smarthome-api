@@ -1,96 +1,91 @@
 package dev.chatree.smarthomeapi.controller;
 
-import dev.chatree.smarthomeapi.model.ErrorResponse;
+import dev.chatree.smarthomeapi.exception.BusinessException;
 import dev.chatree.smarthomeapi.model.warranty.WarrantyRequest;
 import dev.chatree.smarthomeapi.model.warranty.WarrantyResponse;
 import dev.chatree.smarthomeapi.service.WarrantyService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
+import java.util.Objects;
+
+import static dev.chatree.smarthomeapi.constant.MessageConstants.LOG_USER_REQUEST_PATTERN;
 
 @Log4j2
 @RestController
 @RequestMapping("/warranties")
+@RequiredArgsConstructor
 public class WarrantyController {
 
     private final WarrantyService warrantyService;
 
-    public WarrantyController(WarrantyService warrantyService) {
-        this.warrantyService = warrantyService;
-    }
-
     @GetMapping
-    public ResponseEntity<List<WarrantyResponse>> getAllWarranty() {
-        log.info("API GET /warranties");
+    public ResponseEntity<List<WarrantyResponse>> getAllWarranty(Authentication auth,
+                                                                 HttpServletRequest request) {
+        log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
         return ResponseEntity.ok(warrantyService.getAllWarranty());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getWarrantyById(@PathVariable Long id) {
-        log.info("API GET /warranties/{}", id);
-        try {
-            WarrantyResponse warrantyResponse = warrantyService.getWarrantyById(id);
-            return ResponseEntity.ok(warrantyResponse);
-        } catch (HttpClientErrorException e) {
-            log.info("Error: {} {}", e.getMessage(), e.getStatusText());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), e.getStatusText()));
-        }
+    public ResponseEntity<WarrantyResponse> getWarrantyById(@PathVariable Long id,
+                                                            Authentication auth,
+                                                            HttpServletRequest request) {
+        log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
+        var warrantyResponse = warrantyService.getWarrantyById(id);
+        return ResponseEntity.ok(warrantyResponse);
     }
 
     @PostMapping
-    public ResponseEntity<?> createWarranty(@RequestBody WarrantyRequest warranty) {
-        log.info("API POST /warranties");
+    public ResponseEntity<Objects> createWarranty(@RequestBody WarrantyRequest warranty,
+                                                  Authentication auth,
+                                                  HttpServletRequest request) {
+        log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
         warrantyService.createWarranty(warranty);
         return ResponseEntity.created(null).build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateWarranty(@PathVariable Long id,
-                                            @RequestBody WarrantyRequest warranty) {
-        log.info("API PUT /warranties/{}", id);
-        try {
-            warrantyService.updateWarranty(id, warranty);
-            return ResponseEntity.ok().build();
-        } catch (HttpClientErrorException e) {
-            log.info("Error: {} {}", e.getMessage(), e.getStatusText());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), e.getStatusText()));
-        }
+    public ResponseEntity<Objects> updateWarranty(@PathVariable Long id,
+                                                  @RequestBody WarrantyRequest warranty,
+                                                  Authentication auth,
+                                                  HttpServletRequest request) {
+        log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
+        warrantyService.updateWarranty(id, warranty);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteWarranty(@PathVariable Long id) {
-        log.info("API DELETE /warranties/{}", id);
-        try {
-            warrantyService.deleteWarranty(id);
-            return ResponseEntity.ok().build();
-        } catch (HttpClientErrorException e) {
-            log.info("Error: {} {}", e.getMessage(), e.getStatusText());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), e.getStatusText()));
-        }
+    public ResponseEntity<Objects> deleteWarranty(@PathVariable Long id,
+                                                  Authentication auth,
+                                                  HttpServletRequest request) {
+        log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
+        warrantyService.deleteWarranty(id);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
-    public ResponseEntity<?> deleteWarranty(@RequestParam String ids,
-                                            HttpServletRequest request) {
-        log.info("API {}: {}", request.getMethod(), request.getServletPath());
+    public ResponseEntity<Objects> deleteWarranty(@RequestParam String ids,
+                                                  HttpServletRequest request,
+                                                  Authentication auth) throws BusinessException {
+        log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
         if (ids.isBlank()) {
             log.info("Error: ids must not be blank");
-            return ResponseEntity.badRequest().body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "ids must not be blank"));
+            throw new BusinessException("ids must not be blank");
         }
 
-        List<String> idStringList = List.of(ids.split(","));
+        var idStringList = List.of(ids.split(","));
         try {
-            List<Long> idList = idStringList.stream().map(Long::parseLong).toList();
+            var idList = idStringList.stream().map(Long::parseLong).toList();
             warrantyService.deleteMultipleWarranty(idList);
             return ResponseEntity.noContent().build();
         } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "ids must be a number"));
+            throw new BusinessException("ids must be a number");
         }
     }
 }
