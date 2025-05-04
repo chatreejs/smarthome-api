@@ -42,6 +42,9 @@ public class HomeEntity {
     @OneToMany(mappedBy = "home")
     private List<WarrantyEntity> warranties;
 
+    @OneToMany(mappedBy = "home")
+    private List<WaterworksEntity> waterworks;
+
     @CreationTimestamp
     @Column(name = "create_date")
     private LocalDateTime createDate;
