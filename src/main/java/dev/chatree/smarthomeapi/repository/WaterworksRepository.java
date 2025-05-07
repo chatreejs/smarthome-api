@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface WaterworksRepository extends JpaRepository<WaterworksEntity, Long> {
 
-    @Query("SELECT w FROM WaterworksEntity w WHERE w.home.id = :homeId ORDER BY w.invoiceDate DESC")
+    @Query("SELECT w FROM WaterworksEntity w WHERE w.home.id = :homeId ORDER BY w.invoiceDate")
     List<WaterworksEntity> findAllByHomeId(Long homeId);
 }
