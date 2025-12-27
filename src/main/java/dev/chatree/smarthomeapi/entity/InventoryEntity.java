@@ -3,6 +3,7 @@ package dev.chatree.smarthomeapi.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -45,7 +46,7 @@ public class InventoryEntity {
     @Column(name = "create_date")
     private LocalDateTime createDate;
 
-    @CreationTimestamp
+    @UpdateTimestamp
     @Column(name = "update_date")
     private LocalDateTime updateDate;
 
