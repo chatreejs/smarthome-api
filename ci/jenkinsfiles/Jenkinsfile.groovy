@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     VERSION = "0.1.0"
-    IMAGE_URL = "harbor.chatree.dev/chatreejs/smarthome-api"
+    IMAGE_URL = "chatreejs/smarthome-api"
   }
 
   stages {
@@ -42,8 +42,8 @@ pipeline {
 
     stage('Push to registry') {
       steps {
-        withCredentials([usernamePassword(credentialsId: 'chatree-docker-registry-credential', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-          sh 'docker login harbor.chatree.dev -u $USERNAME -p $PASSWORD'
+        withCredentials([usernamePassword(credentialsId: 'docker-hub-credential', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+          sh 'docker login -u $USERNAME -p $PASSWORD'
           sh 'docker push ${IMAGE_URL}:${BUILD_VERSION}'
         }
       }
@@ -57,7 +57,7 @@ pipeline {
 
     stage('Deploy to Kubernetes') {
       steps {
-        build job: "Chatree.js/GitOps/smarthome-manifest-${ENV}", parameters: [string(name: 'API_IMAGE_TAG', value: "${BUILD_VERSION}")]
+        build job: "chatreejs/gitops/smarthome-manifest-${ENV}", parameters: [string(name: 'API_IMAGE_TAG', value: "${BUILD_VERSION}")]
       }
     }
 
