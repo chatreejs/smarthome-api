@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -15,9 +17,9 @@ public class WaterworksResponse {
     private String invoiceDate;
     private Integer rawWaterUsage;
     private Integer waterUsage;
-    private Double serviceCharge;
-    private Double vat;
-    private Double total;
+    private BigDecimal serviceCharge;
+    private BigDecimal vat;
+    private BigDecimal total;
     private String updateBy;
     private String updateDate;
 }
