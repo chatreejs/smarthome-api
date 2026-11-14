@@ -90,6 +90,7 @@ public class WarrantyService {
         warrantyEntity.setSerialNumber(warrantyRequest.getSerialNumber());
         warrantyEntity.setPurchaseDate(LocalDate.parse(warrantyRequest.getPurchaseDate(), DateTimeFormatter.ISO_DATE));
         warrantyEntity.setWarrantyDate(LocalDate.parse(warrantyRequest.getWarrantyDate(), DateTimeFormatter.ISO_DATE));
+        warrantyEntity.setUpdateBy(account);
 
         warrantyRepository.save(warrantyEntity);
     }
