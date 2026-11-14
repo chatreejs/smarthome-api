@@ -1,6 +1,6 @@
 # Smarthome API — Functional Requirements & Status
 
-> Last reviewed against code on **2026-11-14** (commit `a2e44be`).
+> Last reviewed against code on **2026-11-15** (commit `5caabbd`).
 
 ## 1. Overview
 
@@ -131,14 +131,14 @@ All resource endpoints live under `/homes/{homeId}/...` and must verify the call
 | FR-WATER-03 | Create bill | ✅ | The user types every amount from the paper bill; the API doesn't calculate `total` |
 | FR-WATER-04 | Update bill | ✅ | Scoped to home |
 | FR-WATER-05 | Delete bill (single / bulk) | ✅ | Bulk delete is all-or-nothing, scoped to home |
-| FR-WATER-06 | Monthly usage / cost summary | 💡 | Money fields are `BigDecimal` (`numeric(12,2)`). An existing prod table needs a manual `ALTER`, see §6 NFR-07 |
+| FR-WATER-06 | Monthly usage / cost summary | 💡 | No summary endpoint. The web app charts `total` per bill from the list endpoint |
 
 ### 5.6 Electricity bill
 
 | ID | Requirement | Status | Notes |
 |----|-------------|--------|-------|
 | FR-ELEC-01 | CRUD electricity bills per home (list, get, create, update, delete, bulk delete) | ✅ | The user types every amount from the bill. `ft_rate` keeps 4 decimal places, money fields 2 |
-| FR-ELEC-02 | Monthly usage / cost summary | 💡 | |
+| FR-ELEC-02 | Monthly usage / cost summary | 💡 | No summary endpoint. The web app charts `total` per bill from the list endpoint |
 
 ### 5.7 Dashboard & Notifications
 
@@ -153,11 +153,11 @@ All resource endpoints live under `/homes/{homeId}/...` and must verify the call
 |----|-------------|--------|-------|
 | NFR-01 | Consistent error response `{status, errorMessage}` | ✅ | HTTP status now matches the error (404/403/503) |
 | NFR-02 | Request validation (`@Valid`, required fields, date format) | ❌ | Null dates → NPE → 500 |
-| NFR-03 | Home-membership check centralised (not copy-pasted per service) | ✅ | `@RequireHomeAccess` (`security/home/`) on Food/Inventory/Warranty/Waterworks controllers → `HomeAccessGuard`; non-members get 403 |
+| NFR-03 | Home-membership check centralised (not copy-pasted per service) | ✅ | `@RequireHomeAccess` (`security/home/`) on Food/Inventory/Warranty/Waterworks/Electricity controllers → `HomeAccessGuard`; non-members get 403 |
 | NFR-04 | Audit fields `createBy` / `updateBy` / dates on all resources | ✅ | |
 | NFR-05 | Pagination / filtering on list endpoints | ❌ | |
-| NFR-06 | Unit & integration tests | 🟡 | `RequireHomeAccessTest`, `FoodServiceTest`, `ErrorAdviserControllerTest`, `HomeScopingRepositoryTest` (H2). `contextLoads()` needs a real DB |
-| NFR-07 | Schema migrations (Flyway/Liquibase) instead of `ddl-auto: update` | ❌ | `ddl-auto: update` never changes an existing column type. Until migrations exist, run by hand: `ALTER TABLE waterworks ALTER COLUMN service_charge TYPE numeric(12,2), ALTER COLUMN vat TYPE numeric(12,2), ALTER COLUMN total TYPE numeric(12,2);` and, if the `electricity` table already exists, `ALTER TABLE electricity ALTER COLUMN ft_rate TYPE numeric(10,4);` (Hibernate created it with 2 decimal places) |
+| NFR-06 | Unit & integration tests | 🟡 | Service tests for Food, Inventory, Waterworks and Electricity, plus `RequireHomeAccessTest`, `ErrorAdviserControllerTest` and `HomeScopingRepositoryTest` (H2). No Warranty service test and no controller tests per resource. `contextLoads()` needs a real DB |
+| NFR-07 | Schema migrations (Flyway/Liquibase) instead of `ddl-auto: update` | ❌ | `ddl-auto: update` adds new columns but never changes an existing column type. The `BigDecimal` change was applied by hand to the existing database on 2026-11-15: waterworks money columns and electricity money columns to `numeric(12,2)`, electricity `ft_rate` to `numeric(10,4)`, and old electricity rows got `create_by` = the home owner. A new database created by Hibernate needs none of this |
 | NFR-08 | API documentation (OpenAPI/Swagger) | ❌ | |
 | NFR-09 | Health/readiness probes | ✅ | Actuator probes enabled |
 | NFR-10 | CI build, Sonar, Trivy scan | ✅ | `ci/Jenkinsfile` |
