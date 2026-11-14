@@ -32,10 +32,10 @@ Smarthome API is a home ERP backend (Spring Boot + PostgreSQL, OAuth2/JWT resour
 | Home | `/homes` | 🟡 | List + create only |
 | Home membership / sharing | — | ❌ | Many-to-many exists in DB, no API |
 | Permission / roles | `/permissions` | ❌ | Empty controller/service; entity mapping broken |
-| Food | `/foods` | ✅ | Full CRUD, scoped to home |
-| Inventory | `/inventories` | 🟡 | Full CRUD, scoped to home; sort bug |
-| Warranty | `/warranties` | ✅ | Full CRUD, scoped to home |
-| Waterworks bill | `/waterworks` | 🟡 | List only |
+| Food | `/homes/{homeId}/foods` | ✅ | Full CRUD, scoped to home |
+| Inventory | `/homes/{homeId}/inventories` | 🟡 | Full CRUD, scoped to home; sort bug |
+| Warranty | `/homes/{homeId}/warranties` | ✅ | Full CRUD, scoped to home |
+| Waterworks bill | `/homes/{homeId}/waterworks` | 🟡 | List only |
 | Electricity bill | — | ❌ | Entity only |
 | Farm | `/farms` | ❌ | Empty controller |
 | Dashboard / notifications | — | 💡 | Not started |
@@ -73,7 +73,7 @@ Smarthome API is a home ERP backend (Spring Boot + PostgreSQL, OAuth2/JWT resour
 
 ## 5. Home Resources
 
-All resource endpoints take `?homeId=` and must verify the caller is a member of that home **and** that the resource belongs to that home.
+All resource endpoints live under `/homes/{homeId}/...` and must verify the caller is a member of that home **and** that the resource belongs to that home.
 
 ### 5.1 Permission / Roles
 
@@ -92,7 +92,7 @@ All resource endpoints take `?homeId=` and must verify the caller is a member of
 | FR-FOOD-03 | Create food | ✅ | |
 | FR-FOOD-04 | Update food | ✅ | Scoped via `findByIdAndHomeId` |
 | FR-FOOD-05 | Delete food | ✅ | Scoped to home |
-| FR-FOOD-06 | Bulk delete (`DELETE /foods`, form `ids=1,2,3`) | ✅ | All-or-nothing: 404 if any id is not in the home |
+| FR-FOOD-06 | Bulk delete (`DELETE /homes/{homeId}/foods`, form `ids=1,2,3`) | ✅ | All-or-nothing: 404 if any id is not in the home |
 | FR-FOOD-07 | Status `FRESH` / `EXPIRED` derived from expiry date | ✅ | |
 | FR-FOOD-08 | `NEAR_EXPIRY` status (e.g. ≤ 3 days) | 💡 | |
 | FR-FOOD-09 | Consume / decrease quantity | 💡 | |

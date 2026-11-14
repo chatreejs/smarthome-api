@@ -20,7 +20,7 @@ import static dev.chatree.smarthomeapi.constant.MessageConstants.LOG_USER_REQUES
 
 @Log4j2
 @RestController
-@RequestMapping("/inventories")
+@RequestMapping("/homes/{homeId}/inventories")
 @RequireHomeAccess
 @RequiredArgsConstructor
 public class InventoryController {
@@ -29,7 +29,7 @@ public class InventoryController {
 
     @GetMapping
     public ResponseEntity<List<InventoryResponse>> getAllInventory(
-            @RequestParam("homeId") Long homeId,
+            @PathVariable Long homeId,
             Authentication auth,
             HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
@@ -39,7 +39,7 @@ public class InventoryController {
 
     @GetMapping("/{id}")
     public ResponseEntity<InventoryResponse> getInventoryById(@PathVariable Long id,
-                                                              @RequestParam("homeId") Long homeId,
+                                                              @PathVariable Long homeId,
                                                               Authentication auth,
                                                               HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
@@ -48,7 +48,7 @@ public class InventoryController {
     }
 
     @PostMapping
-    public ResponseEntity<Objects> createInventory(@RequestParam("homeId") Long homeId,
+    public ResponseEntity<Objects> createInventory(@PathVariable Long homeId,
                                                    @RequestBody InventoryRequest inventory,
                                                    Authentication auth,
                                                    HttpServletRequest request) {
@@ -59,7 +59,7 @@ public class InventoryController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Objects> updateInventory(@PathVariable Long id,
-                                                   @RequestParam("homeId") Long homeId,
+                                                   @PathVariable Long homeId,
                                                    @RequestBody InventoryRequest inventory,
                                                    Authentication auth,
                                                    HttpServletRequest request) {
@@ -70,7 +70,7 @@ public class InventoryController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Objects> deleteInventory(@PathVariable Long id,
-                                                   @RequestParam("homeId") Long homeId,
+                                                   @PathVariable Long homeId,
                                                    Authentication auth,
                                                    HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
@@ -79,7 +79,7 @@ public class InventoryController {
     }
 
     @DeleteMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
-    public ResponseEntity<Objects> deleteInventory(@RequestParam("homeId") Long homeId,
+    public ResponseEntity<Objects> deleteInventory(@PathVariable Long homeId,
                                                    String ids,
                                                    Authentication auth,
                                                    HttpServletRequest request) throws BusinessException {

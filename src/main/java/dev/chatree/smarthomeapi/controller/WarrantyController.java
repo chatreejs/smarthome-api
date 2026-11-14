@@ -20,7 +20,7 @@ import static dev.chatree.smarthomeapi.constant.MessageConstants.LOG_USER_REQUES
 
 @Log4j2
 @RestController
-@RequestMapping("/warranties")
+@RequestMapping("/homes/{homeId}/warranties")
 @RequireHomeAccess
 @RequiredArgsConstructor
 public class WarrantyController {
@@ -28,7 +28,7 @@ public class WarrantyController {
     private final WarrantyService warrantyService;
 
     @GetMapping
-    public ResponseEntity<List<WarrantyResponse>> getAllWarranty(@RequestParam("homeId") Long homeId,
+    public ResponseEntity<List<WarrantyResponse>> getAllWarranty(@PathVariable Long homeId,
                                                                  Authentication auth,
                                                                  HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
@@ -37,7 +37,7 @@ public class WarrantyController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<WarrantyResponse> getWarrantyById(@RequestParam("homeId") Long homeId,
+    public ResponseEntity<WarrantyResponse> getWarrantyById(@PathVariable Long homeId,
                                                             @PathVariable Long id,
                                                             Authentication auth,
                                                             HttpServletRequest request) {
@@ -47,7 +47,7 @@ public class WarrantyController {
     }
 
     @PostMapping
-    public ResponseEntity<Objects> createWarranty(@RequestParam("homeId") Long homeId,
+    public ResponseEntity<Objects> createWarranty(@PathVariable Long homeId,
                                                   @RequestBody WarrantyRequest warranty,
                                                   Authentication auth,
                                                   HttpServletRequest request) {
@@ -58,7 +58,7 @@ public class WarrantyController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Objects> updateWarranty(@PathVariable Long id,
-                                                  @RequestParam("homeId") Long homeId,
+                                                  @PathVariable Long homeId,
                                                   @RequestBody WarrantyRequest warranty,
                                                   Authentication auth,
                                                   HttpServletRequest request) {
@@ -69,7 +69,7 @@ public class WarrantyController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Objects> deleteWarranty(@PathVariable Long id,
-                                                  @RequestParam("homeId") Long homeId,
+                                                  @PathVariable Long homeId,
                                                   Authentication auth,
                                                   HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
@@ -78,7 +78,7 @@ public class WarrantyController {
     }
 
     @DeleteMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
-    public ResponseEntity<Objects> deleteWarranty(@RequestParam("homeId") Long homeId,
+    public ResponseEntity<Objects> deleteWarranty(@PathVariable Long homeId,
                                                   String ids,
                                                   Authentication auth,
                                                   HttpServletRequest request) throws BusinessException {

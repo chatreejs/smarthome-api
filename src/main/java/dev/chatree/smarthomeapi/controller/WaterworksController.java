@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -19,7 +19,7 @@ import static dev.chatree.smarthomeapi.constant.MessageConstants.LOG_USER_REQUES
 
 @Log4j2
 @RestController
-@RequestMapping("/waterworks")
+@RequestMapping("/homes/{homeId}/waterworks")
 @RequireHomeAccess
 @RequiredArgsConstructor
 public class WaterworksController {
@@ -27,7 +27,7 @@ public class WaterworksController {
     private final WaterworksService waterworksService;
 
     @GetMapping
-    public ResponseEntity<List<WaterworksResponse>> getAllWaterworks(@RequestParam("homeId") Long homeId,
+    public ResponseEntity<List<WaterworksResponse>> getAllWaterworks(@PathVariable Long homeId,
                                                                      Authentication auth,
                                                                      HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());

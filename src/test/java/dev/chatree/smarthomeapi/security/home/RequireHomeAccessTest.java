@@ -44,7 +44,7 @@ class RequireHomeAccessTest {
         when(homeRepository.existsByIdAndAccountsSubject(1L, "member")).thenReturn(true);
         when(foodService.getAllFood(1L)).thenReturn(List.of());
 
-        mockMvc.perform(get("/foods").param("homeId", "1").with(jwt().jwt(j -> j.subject("member"))))
+        mockMvc.perform(get("/homes/1/foods").with(jwt().jwt(j -> j.subject("member"))))
                 .andExpect(status().isOk());
 
         verify(foodService).getAllFood(1L);
@@ -54,9 +54,9 @@ class RequireHomeAccessTest {
     void nonMemberIsForbiddenAndServiceIsNotCalled() throws Exception {
         when(homeRepository.existsByIdAndAccountsSubject(1L, "outsider")).thenReturn(false);
 
-        mockMvc.perform(get("/foods").param("homeId", "1").with(jwt().jwt(j -> j.subject("outsider"))))
+        mockMvc.perform(get("/homes/1/foods").with(jwt().jwt(j -> j.subject("outsider"))))
                 .andExpect(status().isForbidden());
-        mockMvc.perform(delete("/foods/5").param("homeId", "1").with(jwt().jwt(j -> j.subject("outsider"))))
+        mockMvc.perform(delete("/homes/1/foods/5").with(jwt().jwt(j -> j.subject("outsider"))))
                 .andExpect(status().isForbidden());
 
         verify(foodService, never()).getAllFood(any());
@@ -65,7 +65,7 @@ class RequireHomeAccessTest {
 
     @Test
     void unauthenticatedRequestIsRejected() throws Exception {
-        mockMvc.perform(get("/foods").param("homeId", "1"))
+        mockMvc.perform(get("/homes/1/foods"))
                 .andExpect(status().isUnauthorized());
     }
 }
