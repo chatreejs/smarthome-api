@@ -43,3 +43,6 @@ logs
 
 ### Mac ###
 .DS_Store
+
+# Gradle cache that the Jenkins Test stage writes to the workspace
+.gradle-user-home/

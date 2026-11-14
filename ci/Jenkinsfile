@@ -58,12 +58,14 @@ pipeline {
             docker {
               // Keep in sync with the Dockerfile
               image 'gradle:7.6.0-jdk17'
-              args '-u root'
+              // Runs as the Jenkins user, not root, so the next checkout can delete build/ and .gradle/
               reuseNode true
             }
           }
           steps {
-            sh 'gradle build -x test --no-daemon'
+            // The Jenkins user has no home directory in this image, so the Gradle cache goes in the workspace.
+            // The heap and worker limits keep the build from using up the agent's memory.
+            sh 'gradle build -x test --no-daemon --max-workers=2 -g .gradle-user-home -Dorg.gradle.jvmargs=-Xmx512m'
           }
         }
 
