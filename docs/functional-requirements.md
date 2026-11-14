@@ -33,7 +33,7 @@ Smarthome API is a home ERP backend (Spring Boot + PostgreSQL, OAuth2/JWT resour
 | Home membership / sharing | — | ❌ | Many-to-many exists in DB, no API |
 | Permission / roles | `/permissions` | ❌ | Empty controller/service; entity mapping broken |
 | Food | `/homes/{homeId}/foods` | ✅ | Full CRUD, scoped to home |
-| Inventory | `/homes/{homeId}/inventories` | 🟡 | Full CRUD, scoped to home; sort bug |
+| Inventory | `/homes/{homeId}/inventories` | ✅ | Full CRUD, scoped to home |
 | Warranty | `/homes/{homeId}/warranties` | ✅ | Full CRUD, scoped to home |
 | Waterworks bill | `/homes/{homeId}/waterworks` | ✅ | Full CRUD, scoped to home |
 | Electricity bill | `/homes/{homeId}/electricity` | ✅ | Full CRUD, scoped to home |
@@ -100,13 +100,13 @@ All resource endpoints live under `/homes/{homeId}/...` and must verify the call
 
 | ID | Requirement | Status | Notes |
 |----|-------------|--------|-------|
-| FR-INV-01 | List inventory, low-stock first | 🟡 | Custom comparator in `InventoryService.getAllInventory` violates the `Comparator` contract → may throw `IllegalArgumentException: Comparison method violates its general contract` on larger lists |
+| FR-INV-01 | List inventory, low-stock first | ✅ | Low-stock first, then by quantity |
 | FR-INV-02 | Get inventory by id | ✅ | |
 | FR-INV-03 | Create inventory | ✅ | |
 | FR-INV-04 | Update inventory | ✅ | Scoped to home |
 | FR-INV-05 | Delete inventory | ✅ | Scoped to home |
 | FR-INV-06 | Bulk delete | ✅ | All-or-nothing, scoped to home |
-| FR-INV-07 | Status `IN_STOCK` / `LOW_STOCK` (≤30% of max) / `OUT_OF_STOCK` | ✅ | NPE if `maxQuantity` is null |
+| FR-INV-07 | Status `IN_STOCK` / `LOW_STOCK` (≤30% of max) / `OUT_OF_STOCK` | ✅ | No `maxQuantity` counts as in stock |
 | FR-INV-08 | Shopping list generated from low/out-of-stock items | 💡 | |
 
 ### 5.4 Warranty (appliances / devices)
@@ -117,7 +117,7 @@ All resource endpoints live under `/homes/{homeId}/...` and must verify the call
 | FR-WAR-02 | Get warranty by id | ✅ | |
 | FR-WAR-03 | Create warranty | ✅ | |
 | FR-WAR-04 | Update warranty | ✅ | |
-| FR-WAR-05 | Delete warranty | ✅ | Returns 200 while other modules return 204 (inconsistent) |
+| FR-WAR-05 | Delete warranty | ✅ | Scoped to home |
 | FR-WAR-06 | Bulk delete | ✅ | All-or-nothing, scoped to home |
 | FR-WAR-07 | Status `IN_WARRANTY` / `OUT_OF_WARRANTY` | ✅ | |
 | FR-WAR-08 | Attach receipt / warranty card image | 💡 | |
@@ -164,7 +164,7 @@ All resource endpoints live under `/homes/{homeId}/...` and must verify the call
 
 ## 7. Suggested implementation order
 
-1. **Fix critical bugs** — NPE on missing account outside home resources (FR-ACC-04), inventory sort (FR-INV-01). ~~Home-scoping~~, ~~homes overwritten~~, ~~error status codes~~ done.
+1. **Fix critical bugs** — NPE on missing account outside home resources (FR-ACC-04). ~~Home-scoping~~, ~~homes overwritten~~, ~~error status codes~~, ~~inventory sort~~ done.
 2. **Complete Home management** — FR-HOME-02..08 (detail, update, delete, members).
 3. **Permissions** — FR-PERM-01..03 (fix entity mapping first).
 4. ~~**Finish bill modules**~~ done.

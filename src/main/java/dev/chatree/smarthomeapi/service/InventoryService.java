@@ -18,6 +18,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
@@ -31,15 +32,8 @@ public class InventoryService {
 
     public List<InventoryResponse> getAllInventory(Long homeId) {
         var inventoryEntityList = inventoryRepository.findAllByHomeIdAndOrderByQuantityAsc(homeId);
-        inventoryEntityList.sort((o1, o2) -> {
-            if (o1.getQuantity() <= (o1.getMaxQuantity() * 0.3)) {
-                return -1;
-            } else if (o2.getQuantity() <= (o2.getMaxQuantity() * 0.3)) {
-                return 1;
-            } else {
-                return 0;
-            }
-        });
+        // The query sorts by quantity, and List.sort is stable, so each group stays in quantity order.
+        inventoryEntityList.sort(Comparator.comparing((InventoryEntity inventory) -> !isLowStock(inventory.getQuantity(), inventory.getMaxQuantity())));
 
         var inventoryResponseList = new ArrayList<InventoryResponse>();
 
@@ -138,10 +132,17 @@ public class InventoryService {
                 .build();
     }
 
+    /**
+     * An item is low on stock at or below 30% of its max quantity. An item with no max quantity is never low.
+     */
+    private static boolean isLowStock(Double quantity, Double maxQuantity) {
+        return quantity != null && maxQuantity != null && quantity <= maxQuantity * 0.3;
+    }
+
     private InventoryStatus checkInventoryStatus(Double quantity, Double maxQuantity) {
-        if (quantity == 0) {
+        if (quantity == null || quantity == 0) {
             return InventoryStatus.OUT_OF_STOCK;
-        } else if (quantity <= (maxQuantity * 0.3)) {
+        } else if (isLowStock(quantity, maxQuantity)) {
             return InventoryStatus.LOW_STOCK;
         } else {
             return InventoryStatus.IN_STOCK;
