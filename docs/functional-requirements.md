@@ -35,7 +35,7 @@ Smarthome API is a home ERP backend (Spring Boot + PostgreSQL, OAuth2/JWT resour
 | Food | `/homes/{homeId}/foods` | ✅ | Full CRUD, scoped to home |
 | Inventory | `/homes/{homeId}/inventories` | 🟡 | Full CRUD, scoped to home; sort bug |
 | Warranty | `/homes/{homeId}/warranties` | ✅ | Full CRUD, scoped to home |
-| Waterworks bill | `/homes/{homeId}/waterworks` | 🟡 | List only |
+| Waterworks bill | `/homes/{homeId}/waterworks` | ✅ | Full CRUD, scoped to home |
 | Electricity bill | — | ❌ | Entity only |
 | Dashboard / notifications | — | 💡 | Not started |
 | Cross-cutting (validation, errors, tests) | — | 🟡 | See §6 |
@@ -126,12 +126,12 @@ All resource endpoints live under `/homes/{homeId}/...` and must verify the call
 
 | ID | Requirement | Status | Notes |
 |----|-------------|--------|-------|
-| FR-WATER-01 | List water bills for a home | ✅ | |
-| FR-WATER-02 | Get bill by id | ❌ | |
-| FR-WATER-03 | Create bill | ❌ | No `WaterworksRequest` model yet |
-| FR-WATER-04 | Update bill | ❌ | |
-| FR-WATER-05 | Delete bill (single / bulk) | ❌ | |
-| FR-WATER-06 | Monthly usage / cost summary | 💡 | Money fields use `Double` — switch to `BigDecimal` like Electricity |
+| FR-WATER-01 | List water bills for a home | ✅ | Sorted by invoice date |
+| FR-WATER-02 | Get bill by id | ✅ | Scoped to home |
+| FR-WATER-03 | Create bill | ✅ | The user types every amount from the paper bill; the API doesn't calculate `total` |
+| FR-WATER-04 | Update bill | ✅ | Scoped to home |
+| FR-WATER-05 | Delete bill (single / bulk) | ✅ | Bulk delete is all-or-nothing, scoped to home |
+| FR-WATER-06 | Monthly usage / cost summary | 💡 | Money fields are `BigDecimal` (`numeric(12,2)`). An existing prod table needs a manual `ALTER`, see §6 NFR-07 |
 
 ### 5.6 Electricity bill
 
@@ -157,7 +157,7 @@ All resource endpoints live under `/homes/{homeId}/...` and must verify the call
 | NFR-04 | Audit fields `createBy` / `updateBy` / dates on all resources | 🟡 | Missing on Electricity |
 | NFR-05 | Pagination / filtering on list endpoints | ❌ | |
 | NFR-06 | Unit & integration tests | 🟡 | `RequireHomeAccessTest`, `FoodServiceTest`, `ErrorAdviserControllerTest`, `HomeScopingRepositoryTest` (H2). `contextLoads()` needs a real DB |
-| NFR-07 | Schema migrations (Flyway/Liquibase) instead of `ddl-auto: update` | ❌ | |
+| NFR-07 | Schema migrations (Flyway/Liquibase) instead of `ddl-auto: update` | ❌ | `ddl-auto: update` never changes an existing column type. Until migrations exist, run by hand: `ALTER TABLE waterworks ALTER COLUMN service_charge TYPE numeric(12,2), ALTER COLUMN vat TYPE numeric(12,2), ALTER COLUMN total TYPE numeric(12,2);` |
 | NFR-08 | API documentation (OpenAPI/Swagger) | ❌ | |
 | NFR-09 | Health/readiness probes | ✅ | Actuator probes enabled |
 | NFR-10 | CI build, Sonar, Trivy scan | ✅ | `ci/Jenkinsfile` |

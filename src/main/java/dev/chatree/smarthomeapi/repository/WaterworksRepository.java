@@ -5,10 +5,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
 public interface WaterworksRepository extends JpaRepository<WaterworksEntity, Long> {
+
+    WaterworksEntity findByIdAndHomeId(Long id, Long homeId);
+
+    List<WaterworksEntity> findAllByIdInAndHomeId(Collection<Long> ids, Long homeId);
 
     @Query("SELECT w FROM WaterworksEntity w WHERE w.home.id = :homeId ORDER BY w.invoiceDate")
     List<WaterworksEntity> findAllByHomeId(Long homeId);

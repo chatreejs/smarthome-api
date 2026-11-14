@@ -3,6 +3,7 @@ package dev.chatree.smarthomeapi.repository;
 import dev.chatree.smarthomeapi.entity.AccountEntity;
 import dev.chatree.smarthomeapi.entity.FoodEntity;
 import dev.chatree.smarthomeapi.entity.HomeEntity;
+import dev.chatree.smarthomeapi.entity.WaterworksEntity;
 import dev.chatree.smarthomeapi.model.home.HomeRequest;
 import dev.chatree.smarthomeapi.service.HomeService;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,6 +33,8 @@ class HomeScopingRepositoryTest {
     private HomeRepository homeRepository;
     @Autowired
     private FoodRepository foodRepository;
+    @Autowired
+    private WaterworksRepository waterworksRepository;
 
     @Test
     void creatingASecondHomeKeepsTheFirst() {
@@ -75,6 +80,25 @@ class HomeScopingRepositoryTest {
                 .containsExactly(foodA.getId());
     }
 
+    @Test
+    void scopedWaterworksQueriesIgnoreOtherHomes() {
+        var account = account("user-3");
+        var homeA = em.find(HomeEntity.class, homeService.createHome(homeRequest("A"), account).getId());
+        var homeB = em.find(HomeEntity.class, homeService.createHome(homeRequest("B"), account).getId());
+        var billA = waterworks(homeA);
+        var billB = waterworks(homeB);
+        em.flush();
+        em.clear();
+
+        var found = waterworksRepository.findByIdAndHomeId(billA.getId(), homeA.getId());
+        assertThat(found).isNotNull();
+        assertThat(found.getTotal()).isEqualByComparingTo("123.45");
+        assertThat(waterworksRepository.findByIdAndHomeId(billB.getId(), homeA.getId())).isNull();
+        assertThat(waterworksRepository.findAllByIdInAndHomeId(List.of(billA.getId(), billB.getId()), homeA.getId()))
+                .extracting(WaterworksEntity::getId)
+                .containsExactly(billA.getId());
+    }
+
     private AccountEntity account(String subject) {
         var account = new AccountEntity();
         account.setSubject(subject);
@@ -87,6 +111,15 @@ class HomeScopingRepositoryTest {
         food.setName("Milk");
         food.setHome(home);
         return em.persist(food);
+    }
+
+    private WaterworksEntity waterworks(HomeEntity home) {
+        var bill = new WaterworksEntity();
+        bill.setInvoiceNumber("INV-1");
+        bill.setInvoiceDate(LocalDate.of(2026, 10, 31));
+        bill.setTotal(new BigDecimal("123.45"));
+        bill.setHome(home);
+        return em.persist(bill);
     }
 
     private static HomeRequest homeRequest(String name) {

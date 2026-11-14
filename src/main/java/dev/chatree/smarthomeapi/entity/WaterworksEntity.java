@@ -29,14 +29,14 @@ public class WaterworksEntity {
     @Column(name = "water_usage")
     private Integer waterUsage;
 
-    @Column(name = "service_charge")
-    private Double serviceCharge;
+    @Column(name = "service_charge", precision = 12, scale = 2)
+    private BigDecimal serviceCharge;
 
-    @Column(name = "vat")
-    private Double vat;
+    @Column(name = "vat", precision = 12, scale = 2)
+    private BigDecimal vat;
 
-    @Column(name = "total")
-    private Double total;
+    @Column(name = "total", precision = 12, scale = 2)
+    private BigDecimal total;
 
     @ManyToOne
     @JoinColumn(name = "create_by")
