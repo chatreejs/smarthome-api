@@ -1,17 +1,12 @@
 package dev.chatree.smarthomeapi.service;
 
-import dev.chatree.smarthomeapi.constant.ErrorMessage;
 import dev.chatree.smarthomeapi.entity.AccountEntity;
 import dev.chatree.smarthomeapi.entity.WaterworksEntity;
 import dev.chatree.smarthomeapi.model.waterworks.WaterworksResponse;
-import dev.chatree.smarthomeapi.repository.AccountRepository;
-import dev.chatree.smarthomeapi.repository.HomeRepository;
 import dev.chatree.smarthomeapi.repository.WaterworksRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,17 +15,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class WaterworksService {
-    private final AccountRepository accountRepository;
-    private final HomeRepository homeRepository;
     private final WaterworksRepository waterworksRepository;
 
-    public List<WaterworksResponse> getAllWaterworks(Long homeId, String subject) {
-        var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
-
+    public List<WaterworksResponse> getAllWaterworks(Long homeId) {
         var waterworksEntityList = waterworksRepository.findAllByHomeId(homeId);
         var waterworksResponseList = new ArrayList<WaterworksResponse>();
 

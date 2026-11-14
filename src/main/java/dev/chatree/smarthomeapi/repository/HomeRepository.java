@@ -11,4 +11,6 @@ public interface HomeRepository extends JpaRepository<HomeEntity, Long> {
     List<HomeEntity> findByAccountsId(Long accountId);
 
     boolean existsByIdAndAccountsId(Long id, Long accountId);
+
+    boolean existsByIdAndAccountsSubject(Long id, String subject);
 }

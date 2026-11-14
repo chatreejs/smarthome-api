@@ -3,6 +3,7 @@ package dev.chatree.smarthomeapi.controller;
 import dev.chatree.smarthomeapi.exception.BusinessException;
 import dev.chatree.smarthomeapi.model.food.FoodRequest;
 import dev.chatree.smarthomeapi.model.food.FoodResponse;
+import dev.chatree.smarthomeapi.security.home.RequireHomeAccess;
 import dev.chatree.smarthomeapi.service.FoodService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import static dev.chatree.smarthomeapi.constant.MessageConstants.LOG_USER_REQUES
 @Log4j2
 @RestController
 @RequestMapping("/foods")
+@RequireHomeAccess
 @RequiredArgsConstructor
 public class FoodController {
 
@@ -30,8 +32,7 @@ public class FoodController {
                                                          Authentication auth,
                                                          HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-        var subject = auth.getName();
-        var foodResponseList = foodService.getAllFood(homeId, subject);
+        var foodResponseList = foodService.getAllFood(homeId);
         return ResponseEntity.ok(foodResponseList);
     }
 
@@ -41,8 +42,7 @@ public class FoodController {
                                                     Authentication auth,
                                                     HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-        var subject = auth.getName();
-        var foodResponse = foodService.getFoodById(id, homeId, subject);
+        var foodResponse = foodService.getFoodById(id, homeId);
         return ResponseEntity.ok(foodResponse);
 
     }
@@ -53,8 +53,7 @@ public class FoodController {
                                               Authentication auth,
                                               HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-        var subject = auth.getName();
-        foodService.createFood(food, homeId, subject);
+        foodService.createFood(food, homeId, auth.getName());
         return ResponseEntity.created(null).build();
     }
 
@@ -65,8 +64,7 @@ public class FoodController {
                                               Authentication auth,
                                               HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-        var subject = auth.getName();
-        foodService.updateFood(id, food, homeId, subject);
+        foodService.updateFood(id, food, homeId, auth.getName());
         return ResponseEntity.ok().build();
     }
 
@@ -77,8 +75,7 @@ public class FoodController {
                                               HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
 
-        var subject = auth.getName();
-        foodService.deleteFood(id, homeId, subject);
+        foodService.deleteFood(id, homeId);
         return ResponseEntity.noContent().build();
     }
 
@@ -92,9 +89,8 @@ public class FoodController {
             throw new BusinessException("ids must not be blank");
         }
         var idStringList = List.of(ids.split(","));
-        var subject = auth.getName();
         var idList = idStringList.stream().map(Long::parseLong).toList();
-        foodService.deleteMultipleFood(idList, homeId, subject);
+        foodService.deleteMultipleFood(idList, homeId);
         return ResponseEntity.noContent().build();
 
     }

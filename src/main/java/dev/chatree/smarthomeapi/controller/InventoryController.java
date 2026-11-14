@@ -3,6 +3,7 @@ package dev.chatree.smarthomeapi.controller;
 import dev.chatree.smarthomeapi.exception.BusinessException;
 import dev.chatree.smarthomeapi.model.inventory.InventoryRequest;
 import dev.chatree.smarthomeapi.model.inventory.InventoryResponse;
+import dev.chatree.smarthomeapi.security.home.RequireHomeAccess;
 import dev.chatree.smarthomeapi.service.InventoryService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import static dev.chatree.smarthomeapi.constant.MessageConstants.LOG_USER_REQUES
 @Log4j2
 @RestController
 @RequestMapping("/inventories")
+@RequireHomeAccess
 @RequiredArgsConstructor
 public class InventoryController {
 
@@ -31,8 +33,7 @@ public class InventoryController {
             Authentication auth,
             HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-        var subject = auth.getName();
-        var inventoryResponseList = inventoryService.getAllInventory(homeId, subject);
+        var inventoryResponseList = inventoryService.getAllInventory(homeId);
         return ResponseEntity.ok(inventoryResponseList);
     }
 
@@ -42,8 +43,7 @@ public class InventoryController {
                                                               Authentication auth,
                                                               HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-        var subject = auth.getName();
-        var inventoryResponse = inventoryService.getInventoryById(id, homeId, subject);
+        var inventoryResponse = inventoryService.getInventoryById(id, homeId);
         return ResponseEntity.ok(inventoryResponse);
     }
 
@@ -53,8 +53,7 @@ public class InventoryController {
                                                    Authentication auth,
                                                    HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-        var subject = auth.getName();
-        inventoryService.createInventory(inventory, homeId, subject);
+        inventoryService.createInventory(inventory, homeId, auth.getName());
         return ResponseEntity.created(null).build();
     }
 
@@ -65,8 +64,7 @@ public class InventoryController {
                                                    Authentication auth,
                                                    HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-        var subject = auth.getName();
-        inventoryService.updateInventory(id, inventory, homeId, subject);
+        inventoryService.updateInventory(id, inventory, homeId, auth.getName());
         return ResponseEntity.ok().build();
     }
 
@@ -76,8 +74,7 @@ public class InventoryController {
                                                    Authentication auth,
                                                    HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-        var subject = auth.getName();
-        inventoryService.deleteInventory(id, homeId, subject);
+        inventoryService.deleteInventory(id, homeId);
         return ResponseEntity.noContent().build();
     }
 
@@ -92,9 +89,8 @@ public class InventoryController {
         }
 
         var idStringList = List.of(ids.split(","));
-        var subject = auth.getName();
         var idList = idStringList.stream().map(Long::parseLong).toList();
-        inventoryService.deleteMultipleInventory(idList, homeId, subject);
+        inventoryService.deleteMultipleInventory(idList, homeId);
         return ResponseEntity.noContent().build();
     }
 }
