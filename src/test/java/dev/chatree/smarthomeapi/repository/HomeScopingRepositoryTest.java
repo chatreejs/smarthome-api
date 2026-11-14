@@ -1,6 +1,7 @@
 package dev.chatree.smarthomeapi.repository;
 
 import dev.chatree.smarthomeapi.entity.AccountEntity;
+import dev.chatree.smarthomeapi.entity.ElectricityEntity;
 import dev.chatree.smarthomeapi.entity.FoodEntity;
 import dev.chatree.smarthomeapi.entity.HomeEntity;
 import dev.chatree.smarthomeapi.entity.WaterworksEntity;
@@ -35,6 +36,8 @@ class HomeScopingRepositoryTest {
     private FoodRepository foodRepository;
     @Autowired
     private WaterworksRepository waterworksRepository;
+    @Autowired
+    private ElectricityRepository electricityRepository;
 
     @Test
     void creatingASecondHomeKeepsTheFirst() {
@@ -99,6 +102,26 @@ class HomeScopingRepositoryTest {
                 .containsExactly(billA.getId());
     }
 
+    @Test
+    void scopedElectricityQueriesIgnoreOtherHomes() {
+        var account = account("user-4");
+        var homeA = em.find(HomeEntity.class, homeService.createHome(homeRequest("A"), account).getId());
+        var homeB = em.find(HomeEntity.class, homeService.createHome(homeRequest("B"), account).getId());
+        var billA = electricity(homeA);
+        var billB = electricity(homeB);
+        em.flush();
+        em.clear();
+
+        var found = electricityRepository.findByIdAndHomeId(billA.getId(), homeA.getId());
+        assertThat(found).isNotNull();
+        // ft_rate keeps four decimal places, unlike the money columns.
+        assertThat(found.getFtRate()).isEqualByComparingTo("0.3972");
+        assertThat(electricityRepository.findByIdAndHomeId(billB.getId(), homeA.getId())).isNull();
+        assertThat(electricityRepository.findAllByIdInAndHomeId(List.of(billA.getId(), billB.getId()), homeA.getId()))
+                .extracting(ElectricityEntity::getId)
+                .containsExactly(billA.getId());
+    }
+
     private AccountEntity account(String subject) {
         var account = new AccountEntity();
         account.setSubject(subject);
@@ -117,6 +140,17 @@ class HomeScopingRepositoryTest {
         var bill = new WaterworksEntity();
         bill.setInvoiceNumber("INV-1");
         bill.setInvoiceDate(LocalDate.of(2026, 10, 31));
+        bill.setTotal(new BigDecimal("123.45"));
+        bill.setHome(home);
+        return em.persist(bill);
+    }
+
+    private ElectricityEntity electricity(HomeEntity home) {
+        var bill = new ElectricityEntity();
+        bill.setInvoiceNumber("INV-1");
+        bill.setInvoiceDate(LocalDate.of(2026, 10, 31));
+        bill.setUsage(250);
+        bill.setFtRate(new BigDecimal("0.3972"));
         bill.setTotal(new BigDecimal("123.45"));
         bill.setHome(home);
         return em.persist(bill);

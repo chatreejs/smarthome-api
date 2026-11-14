@@ -26,23 +26,31 @@ public class ElectricityEntity {
     @Column(name = "usage")
     private Integer usage;
 
-    @Column(name = "ft_rate")
+    @Column(name = "ft_rate", precision = 10, scale = 4)
     private BigDecimal ftRate;
 
-    @Column(name = "electricity_price")
+    @Column(name = "electricity_price", precision = 12, scale = 2)
     private BigDecimal electricityPrice;
 
-    @Column(name = "service_charge")
+    @Column(name = "service_charge", precision = 12, scale = 2)
     private BigDecimal serviceCharge;
 
-    @Column(name = "ft")
+    @Column(name = "ft", precision = 12, scale = 2)
     private BigDecimal ft;
 
-    @Column(name = "vat")
+    @Column(name = "vat", precision = 12, scale = 2)
     private BigDecimal vat;
 
-    @Column(name = "total")
+    @Column(name = "total", precision = 12, scale = 2)
     private BigDecimal total;
+
+    @ManyToOne
+    @JoinColumn(name = "create_by")
+    private AccountEntity createBy;
+
+    @ManyToOne
+    @JoinColumn(name = "update_by")
+    private AccountEntity updateBy;
 
     @CreationTimestamp
     @Column(name = "create_date")
