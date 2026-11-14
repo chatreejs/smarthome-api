@@ -12,11 +12,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Log4j2
@@ -103,8 +105,14 @@ public class WarrantyService {
         warrantyRepository.delete(warrantyEntity);
     }
 
+    @Transactional
     public void deleteMultipleWarranty(List<Long> ids, Long homeId) {
-        warrantyRepository.deleteAllById(ids);
+        var uniqueIds = new HashSet<>(ids);
+        var warrantyEntityList = warrantyRepository.findAllByIdInAndHomeId(uniqueIds, homeId);
+        if (warrantyEntityList.size() != uniqueIds.size()) {
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Warranty not found");
+        }
+        warrantyRepository.deleteAll(warrantyEntityList);
     }
 
     private WarrantyResponse generateWarrantyResponse(WarrantyEntity warrantyEntity, AccountEntity updateBy) {
