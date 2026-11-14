@@ -20,7 +20,7 @@ import static dev.chatree.smarthomeapi.constant.MessageConstants.LOG_USER_REQUES
 
 @Log4j2
 @RestController
-@RequestMapping("/foods")
+@RequestMapping("/homes/{homeId}/foods")
 @RequireHomeAccess
 @RequiredArgsConstructor
 public class FoodController {
@@ -28,7 +28,7 @@ public class FoodController {
     private final FoodService foodService;
 
     @GetMapping
-    public ResponseEntity<List<FoodResponse>> getAllFood(@RequestParam("homeId") Long homeId,
+    public ResponseEntity<List<FoodResponse>> getAllFood(@PathVariable Long homeId,
                                                          Authentication auth,
                                                          HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
@@ -37,7 +37,7 @@ public class FoodController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FoodResponse> getFoodById(@RequestParam("homeId") Long homeId,
+    public ResponseEntity<FoodResponse> getFoodById(@PathVariable Long homeId,
                                                     @PathVariable Long id,
                                                     Authentication auth,
                                                     HttpServletRequest request) {
@@ -48,7 +48,7 @@ public class FoodController {
     }
 
     @PostMapping
-    public ResponseEntity<Objects> createFood(@RequestParam("homeId") Long homeId,
+    public ResponseEntity<Objects> createFood(@PathVariable Long homeId,
                                               @RequestBody FoodRequest food,
                                               Authentication auth,
                                               HttpServletRequest request) {
@@ -59,7 +59,7 @@ public class FoodController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Objects> updateFood(@PathVariable Long id,
-                                              @RequestParam("homeId") Long homeId,
+                                              @PathVariable Long homeId,
                                               @RequestBody FoodRequest food,
                                               Authentication auth,
                                               HttpServletRequest request) {
@@ -70,7 +70,7 @@ public class FoodController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Objects> deleteFood(@PathVariable Long id,
-                                              @RequestParam("homeId") Long homeId,
+                                              @PathVariable Long homeId,
                                               Authentication auth,
                                               HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
@@ -80,7 +80,7 @@ public class FoodController {
     }
 
     @DeleteMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
-    public ResponseEntity<Objects> deleteMultipleFood(@RequestParam("homeId") Long homeId,
+    public ResponseEntity<Objects> deleteMultipleFood(@PathVariable Long homeId,
                                                       String ids,
                                                       Authentication auth,
                                                       HttpServletRequest request) throws BusinessException {
