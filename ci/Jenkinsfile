@@ -48,6 +48,11 @@ pipeline {
                 : "${env.VERSION}-${env.GIT_COMMIT.substring(0, 7)}"
               currentBuild.displayName += " version ${env.BUILD_VERSION}"
             }
+
+            // Builds that ran Gradle as root left root-owned build/ and .gradle/ in the workspace, and the
+            // Sonar and Trivy stages still run as root. Hand everything back to the Jenkins user so the
+            // Test stage can write to it. Uses a root container because the Jenkins user has no sudo
+            sh 'docker run --rm -v "$WORKSPACE:/ws" alpine:3.20 chown -R "$(id -u):$(id -g)" /ws'
           }
         }
 
