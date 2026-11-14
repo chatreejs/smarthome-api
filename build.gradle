@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'dev.chatree'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.0'
 sourceCompatibility = '17'
 
 configurations {
@@ -45,4 +45,9 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// A fixed name, so the Dockerfile doesn't depend on the version
+tasks.named('bootJar') {
+	archiveFileName = 'app.jar'
 }

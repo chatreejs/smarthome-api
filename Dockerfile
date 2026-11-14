@@ -7,5 +7,5 @@ RUN gradle build -x test
 FROM gcr.io/distroless/java17-debian12:latest
 EXPOSE 8080
 
-COPY --from=build /home/gradle/src/build/libs/*-SNAPSHOT.jar app.jar
+COPY --from=build /home/gradle/src/build/libs/app.jar app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
