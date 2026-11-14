@@ -79,7 +79,7 @@ public class ErrorAdviserController {
             errorResponse = new ErrorResponse(status.value(), "An unexpected error occurred");
         }
         log.info("Http Client Error Exception Error: {}", errorResponse.getErrorMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        return ResponseEntity.status(status).body(errorResponse);
     }
 
 }
