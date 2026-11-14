@@ -1,6 +1,5 @@
 package dev.chatree.smarthomeapi.service;
 
-import dev.chatree.smarthomeapi.constant.ErrorMessage;
 import dev.chatree.smarthomeapi.entity.AccountEntity;
 import dev.chatree.smarthomeapi.entity.WarrantyEntity;
 import dev.chatree.smarthomeapi.model.warranty.WarrantyRequest;
@@ -29,13 +28,7 @@ public class WarrantyService {
     private final HomeRepository homeRepository;
     private final WarrantyRepository warrantyRepository;
 
-    public List<WarrantyResponse> getAllWarranty(Long homeId, String subject) {
-        var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
-
+    public List<WarrantyResponse> getAllWarranty(Long homeId) {
         var warrantyEntityList = warrantyRepository.findAllByHomeId(homeId);
         var warrantyResponseList = new ArrayList<WarrantyResponse>();
 
@@ -51,13 +44,7 @@ public class WarrantyService {
         return warrantyResponseList;
     }
 
-    public WarrantyResponse getWarrantyById(Long id, Long homeId, String subject) {
-        var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
-
+    public WarrantyResponse getWarrantyById(Long id, Long homeId) {
         var warrantyEntity = warrantyRepository.findByIdAndHomeId(id, homeId);
         if (warrantyEntity == null) {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Warranty not found");
@@ -73,10 +60,6 @@ public class WarrantyService {
 
     public void createWarranty(WarrantyRequest warrantyRequest, Long homeId, String subject) {
         var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
 
         var homeEntity = homeRepository.findById(homeId).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Home not found"));
         var warrantyEntity = new WarrantyEntity();
@@ -95,10 +78,6 @@ public class WarrantyService {
 
     public void updateWarranty(Long id, WarrantyRequest warrantyRequest, Long homeId, String subject) {
         var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
 
         var warrantyEntity = warrantyRepository.findByIdAndHomeId(id, homeId);
         if (warrantyEntity == null) {
@@ -115,13 +94,7 @@ public class WarrantyService {
         warrantyRepository.save(warrantyEntity);
     }
 
-    public void deleteWarranty(Long id, Long homeId, String subject) {
-        var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
-
+    public void deleteWarranty(Long id, Long homeId) {
         var warrantyEntity = warrantyRepository.findByIdAndHomeId(id, homeId);
         if (warrantyEntity == null) {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Warranty not found");
@@ -129,13 +102,7 @@ public class WarrantyService {
         warrantyRepository.delete(warrantyEntity);
     }
 
-    public void deleteMultipleWarranty(List<Long> ids, Long homeId, String subject) {
-        var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
-
+    public void deleteMultipleWarranty(List<Long> ids, Long homeId) {
         warrantyRepository.deleteAllById(ids);
     }
 

@@ -1,6 +1,5 @@
 package dev.chatree.smarthomeapi.service;
 
-import dev.chatree.smarthomeapi.constant.ErrorMessage;
 import dev.chatree.smarthomeapi.entity.AccountEntity;
 import dev.chatree.smarthomeapi.entity.FoodEntity;
 import dev.chatree.smarthomeapi.model.food.FoodRequest;
@@ -28,13 +27,7 @@ public class FoodService {
     private final HomeRepository homeRepository;
     private final FoodRepository foodRepository;
 
-    public List<FoodResponse> getAllFood(Long homeId, String subject) {
-        var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
-
+    public List<FoodResponse> getAllFood(Long homeId) {
         var foodEntityList = foodRepository.findAllByHomeId(homeId);
         var foodResponseList = new ArrayList<FoodResponse>();
 
@@ -49,13 +42,7 @@ public class FoodService {
         return foodResponseList;
     }
 
-    public FoodResponse getFoodById(Long id, Long homeId, String subject) {
-        var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
-
+    public FoodResponse getFoodById(Long id, Long homeId) {
         var foodEntity = foodRepository.findByIdAndHomeId(id, homeId);
         if (foodEntity == null) {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Food not found");
@@ -70,10 +57,6 @@ public class FoodService {
 
     public void createFood(FoodRequest foodRequest, Long homeId, String subject) {
         var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
 
         var homeEntity = homeRepository.findById(homeId).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Home not found"));
         var foodEntity = new FoodEntity();
@@ -91,10 +74,6 @@ public class FoodService {
 
     public void updateFood(Long id, FoodRequest foodRequest, Long homeId, String subject) {
         var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
 
         var foodEntity = foodRepository.findById(id).orElse(null);
         if (foodEntity == null) {
@@ -112,13 +91,7 @@ public class FoodService {
         foodRepository.save(foodEntity);
     }
 
-    public void deleteFood(Long id, Long homeId, String subject) {
-        var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
-
+    public void deleteFood(Long id, Long homeId) {
         var foodEntity = foodRepository.findById(id).orElse(null);
         if (foodEntity == null) {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Food not found");
@@ -127,13 +100,7 @@ public class FoodService {
         foodRepository.delete(foodEntity);
     }
 
-    public void deleteMultipleFood(List<Long> ids, Long homeId, String subject) {
-        var account = accountRepository.findBySubject(subject);
-        boolean isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
-
+    public void deleteMultipleFood(List<Long> ids, Long homeId) {
         foodRepository.deleteAllById(ids);
     }
 

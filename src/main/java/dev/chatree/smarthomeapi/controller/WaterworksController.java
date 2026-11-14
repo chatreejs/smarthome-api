@@ -1,6 +1,7 @@
 package dev.chatree.smarthomeapi.controller;
 
 import dev.chatree.smarthomeapi.model.waterworks.WaterworksResponse;
+import dev.chatree.smarthomeapi.security.home.RequireHomeAccess;
 import dev.chatree.smarthomeapi.service.WaterworksService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import static dev.chatree.smarthomeapi.constant.MessageConstants.LOG_USER_REQUES
 @Log4j2
 @RestController
 @RequestMapping("/waterworks")
+@RequireHomeAccess
 @RequiredArgsConstructor
 public class WaterworksController {
 
@@ -29,8 +31,7 @@ public class WaterworksController {
                                                                      Authentication auth,
                                                                      HttpServletRequest request) {
         log.info(LOG_USER_REQUEST_PATTERN, request.getMethod(), request.getServletPath(), auth.getName());
-        var subject = auth.getName();
-        var waterworksResponseList = waterworksService.getAllWaterworks(homeId, subject);
+        var waterworksResponseList = waterworksService.getAllWaterworks(homeId);
         return ResponseEntity.ok(waterworksResponseList);
     }
 }

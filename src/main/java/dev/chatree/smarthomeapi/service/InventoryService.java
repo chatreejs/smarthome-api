@@ -1,6 +1,5 @@
 package dev.chatree.smarthomeapi.service;
 
-import dev.chatree.smarthomeapi.constant.ErrorMessage;
 import dev.chatree.smarthomeapi.entity.AccountEntity;
 import dev.chatree.smarthomeapi.entity.InventoryEntity;
 import dev.chatree.smarthomeapi.model.inventory.InventoryRequest;
@@ -28,13 +27,7 @@ public class InventoryService {
     private final HomeRepository homeRepository;
     private final InventoryRepository inventoryRepository;
 
-    public List<InventoryResponse> getAllInventory(Long homeId, String subject) {
-        var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
-
+    public List<InventoryResponse> getAllInventory(Long homeId) {
         var inventoryEntityList = inventoryRepository.findAllByHomeIdAndOrderByQuantityAsc(homeId);
         inventoryEntityList.sort((o1, o2) -> {
             if (o1.getQuantity() <= (o1.getMaxQuantity() * 0.3)) {
@@ -59,13 +52,7 @@ public class InventoryService {
         return inventoryResponseList;
     }
 
-    public InventoryResponse getInventoryById(Long id, Long homeId, String subject) {
-        var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
-
+    public InventoryResponse getInventoryById(Long id, Long homeId) {
         var inventoryEntity = inventoryRepository.findByIdAndHomeId(id, homeId);
         if (inventoryEntity == null) {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Inventory not found");
@@ -81,10 +68,6 @@ public class InventoryService {
 
     public void createInventory(InventoryRequest inventoryRequest, Long homeId, String subject) {
         AccountEntity account = accountRepository.findBySubject(subject);
-        boolean isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
 
         var homeEntity = homeRepository.findById(homeId).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Home not found"));
         var inventoryEntity = new InventoryEntity();
@@ -102,10 +85,6 @@ public class InventoryService {
 
     public void updateInventory(Long id, InventoryRequest inventoryRequest, Long homeId, String subject) {
         var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
 
         var inventoryEntity = inventoryRepository.findById(id).orElse(null);
         if (inventoryEntity == null) {
@@ -123,13 +102,7 @@ public class InventoryService {
         inventoryRepository.save(inventoryEntity);
     }
 
-    public void deleteInventory(Long id, Long homeId, String subject) {
-        var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
-
+    public void deleteInventory(Long id, Long homeId) {
         var inventoryEntity = inventoryRepository.findById(id).orElse(null);
         if (inventoryEntity == null) {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Inventory not found");
@@ -138,13 +111,7 @@ public class InventoryService {
         inventoryRepository.deleteById(id);
     }
 
-    public void deleteMultipleInventory(List<Long> ids, Long homeId, String subject) {
-        var account = accountRepository.findBySubject(subject);
-        var isHomeOwner = homeRepository.existsByIdAndAccountsId(homeId, account.getId());
-        if (!isHomeOwner) {
-            throw new HttpClientErrorException(HttpStatus.FORBIDDEN, ErrorMessage.ACCOUNT_NOT_ALLOW_TO_ACCESS_HOME);
-        }
-
+    public void deleteMultipleInventory(List<Long> ids, Long homeId) {
         inventoryRepository.deleteAllById(ids);
     }
 
