@@ -12,11 +12,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Log4j2
@@ -75,7 +77,7 @@ public class FoodService {
     public void updateFood(Long id, FoodRequest foodRequest, Long homeId, String subject) {
         var account = accountRepository.findBySubject(subject);
 
-        var foodEntity = foodRepository.findById(id).orElse(null);
+        var foodEntity = foodRepository.findByIdAndHomeId(id, homeId);
         if (foodEntity == null) {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Food not found");
         }
@@ -92,7 +94,7 @@ public class FoodService {
     }
 
     public void deleteFood(Long id, Long homeId) {
-        var foodEntity = foodRepository.findById(id).orElse(null);
+        var foodEntity = foodRepository.findByIdAndHomeId(id, homeId);
         if (foodEntity == null) {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Food not found");
         }
@@ -100,8 +102,14 @@ public class FoodService {
         foodRepository.delete(foodEntity);
     }
 
+    @Transactional
     public void deleteMultipleFood(List<Long> ids, Long homeId) {
-        foodRepository.deleteAllById(ids);
+        var uniqueIds = new HashSet<>(ids);
+        var foodEntityList = foodRepository.findAllByIdInAndHomeId(uniqueIds, homeId);
+        if (foodEntityList.size() != uniqueIds.size()) {
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Food not found");
+        }
+        foodRepository.deleteAll(foodEntityList);
     }
 
     private FoodResponse generateFoodResponse(FoodEntity foodEntity, AccountEntity updateBy) {

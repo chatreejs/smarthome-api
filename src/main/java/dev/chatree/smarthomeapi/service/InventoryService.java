@@ -12,11 +12,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Log4j2
@@ -86,7 +88,7 @@ public class InventoryService {
     public void updateInventory(Long id, InventoryRequest inventoryRequest, Long homeId, String subject) {
         var account = accountRepository.findBySubject(subject);
 
-        var inventoryEntity = inventoryRepository.findById(id).orElse(null);
+        var inventoryEntity = inventoryRepository.findByIdAndHomeId(id, homeId);
         if (inventoryEntity == null) {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Inventory not found");
         }
@@ -103,16 +105,22 @@ public class InventoryService {
     }
 
     public void deleteInventory(Long id, Long homeId) {
-        var inventoryEntity = inventoryRepository.findById(id).orElse(null);
+        var inventoryEntity = inventoryRepository.findByIdAndHomeId(id, homeId);
         if (inventoryEntity == null) {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Inventory not found");
         }
 
-        inventoryRepository.deleteById(id);
+        inventoryRepository.delete(inventoryEntity);
     }
 
+    @Transactional
     public void deleteMultipleInventory(List<Long> ids, Long homeId) {
-        inventoryRepository.deleteAllById(ids);
+        var uniqueIds = new HashSet<>(ids);
+        var inventoryEntityList = inventoryRepository.findAllByIdInAndHomeId(uniqueIds, homeId);
+        if (inventoryEntityList.size() != uniqueIds.size()) {
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Inventory not found");
+        }
+        inventoryRepository.deleteAll(inventoryEntityList);
     }
 
     private InventoryResponse generateInventoryResponse(InventoryEntity inventoryEntity, AccountEntity updateBy) {
