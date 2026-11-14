@@ -9,7 +9,7 @@ Smarthome API is a home ERP backend (Spring Boot + PostgreSQL, OAuth2/JWT resour
 **Core domain rule**
 
 - **1 Account → many Homes** (and a Home can be shared with many Accounts — `home_account` many-to-many).
-- **1 Home → many Resources**: Food, Inventory, Warranty, Waterworks bill, Electricity bill, Farm (planned).
+- **1 Home → many Resources**: Food, Inventory, Warranty, Waterworks bill, Electricity bill.
 - Every resource is **scoped to a Home**; an account may only see/modify resources of homes it belongs to.
 
 ### Status legend
@@ -37,7 +37,6 @@ Smarthome API is a home ERP backend (Spring Boot + PostgreSQL, OAuth2/JWT resour
 | Warranty | `/homes/{homeId}/warranties` | ✅ | Full CRUD, scoped to home |
 | Waterworks bill | `/homes/{homeId}/waterworks` | 🟡 | List only |
 | Electricity bill | — | ❌ | Entity only |
-| Farm | `/farms` | ❌ | Empty controller |
 | Dashboard / notifications | — | 💡 | Not started |
 | Cross-cutting (validation, errors, tests) | — | 🟡 | See §6 |
 
@@ -141,13 +140,7 @@ All resource endpoints live under `/homes/{homeId}/...` and must verify the call
 | FR-ELEC-01 | CRUD electricity bills per home (list, get, create, update, delete, bulk delete) | ❌ | Only `ElectricityEntity` exists; no repository/service/controller. Entity lacks `createBy`/`updateBy` and isn't mapped in `HomeEntity` |
 | FR-ELEC-02 | Monthly usage / cost summary | 💡 | |
 
-### 5.7 Farm
-
-| ID | Requirement | Status | Notes |
-|----|-------------|--------|-------|
-| FR-FARM-01 | Farm module (`/farms`) | ❌ | Empty controller, no entity. **Scope to be defined** (see §8) |
-
-### 5.8 Dashboard & Notifications
+### 5.7 Dashboard & Notifications
 
 | ID | Requirement | Status | Notes |
 |----|-------------|--------|-------|
@@ -176,12 +169,11 @@ All resource endpoints live under `/homes/{homeId}/...` and must verify the call
 3. **Permissions** — FR-PERM-01..03 (fix entity mapping first).
 4. **Finish bill modules** — Waterworks CRUD, then Electricity CRUD.
 5. **Validation + tests** — NFR-02, NFR-06.
-6. **Farm, dashboard, notifications** once scope is confirmed.
+6. **Dashboard, notifications** once scope is confirmed.
 
 ## 8. Open questions
 
-1. **Farm module** — what should it track (crops, livestock, planting/harvest dates, yield)?
-2. **Permissions** — fine-grained per module (`FOOD_READ`, `FOOD_WRITE`…) or simple roles (`OWNER` / `MEMBER` / `VIEWER`)? What is `HomeRequest.homePermission` meant for?
-3. **Membership** — invite by username/email with accept flow, or add directly?
-4. **Deleting a home** — hard delete all child resources, or soft delete?
-5. **Other resource types** planned (e.g. rooms, IoT devices, maintenance schedule, internet/gas bills)?
+1. **Permissions** — fine-grained per module (`FOOD_READ`, `FOOD_WRITE`…) or simple roles (`OWNER` / `MEMBER` / `VIEWER`)? What is `HomeRequest.homePermission` meant for?
+2. **Membership** — invite by username/email with accept flow, or add directly?
+3. **Deleting a home** — hard delete all child resources, or soft delete?
+4. **Other resource types** planned (e.g. rooms, IoT devices, maintenance schedule, internet/gas bills)?
