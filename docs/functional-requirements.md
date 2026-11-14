@@ -36,7 +36,7 @@ Smarthome API is a home ERP backend (Spring Boot + PostgreSQL, OAuth2/JWT resour
 | Inventory | `/homes/{homeId}/inventories` | 🟡 | Full CRUD, scoped to home; sort bug |
 | Warranty | `/homes/{homeId}/warranties` | ✅ | Full CRUD, scoped to home |
 | Waterworks bill | `/homes/{homeId}/waterworks` | ✅ | Full CRUD, scoped to home |
-| Electricity bill | — | ❌ | Entity only |
+| Electricity bill | `/homes/{homeId}/electricity` | ✅ | Full CRUD, scoped to home |
 | Dashboard / notifications | — | 💡 | Not started |
 | Cross-cutting (validation, errors, tests) | — | 🟡 | See §6 |
 
@@ -137,7 +137,7 @@ All resource endpoints live under `/homes/{homeId}/...` and must verify the call
 
 | ID | Requirement | Status | Notes |
 |----|-------------|--------|-------|
-| FR-ELEC-01 | CRUD electricity bills per home (list, get, create, update, delete, bulk delete) | ❌ | Only `ElectricityEntity` exists; no repository/service/controller. Entity lacks `createBy`/`updateBy` and isn't mapped in `HomeEntity` |
+| FR-ELEC-01 | CRUD electricity bills per home (list, get, create, update, delete, bulk delete) | ✅ | The user types every amount from the bill. `ft_rate` keeps 4 decimal places, money fields 2 |
 | FR-ELEC-02 | Monthly usage / cost summary | 💡 | |
 
 ### 5.7 Dashboard & Notifications
@@ -154,10 +154,10 @@ All resource endpoints live under `/homes/{homeId}/...` and must verify the call
 | NFR-01 | Consistent error response `{status, errorMessage}` | ✅ | HTTP status now matches the error (404/403/503) |
 | NFR-02 | Request validation (`@Valid`, required fields, date format) | ❌ | Null dates → NPE → 500 |
 | NFR-03 | Home-membership check centralised (not copy-pasted per service) | ✅ | `@RequireHomeAccess` (`security/home/`) on Food/Inventory/Warranty/Waterworks controllers → `HomeAccessGuard`; non-members get 403 |
-| NFR-04 | Audit fields `createBy` / `updateBy` / dates on all resources | 🟡 | Missing on Electricity |
+| NFR-04 | Audit fields `createBy` / `updateBy` / dates on all resources | ✅ | |
 | NFR-05 | Pagination / filtering on list endpoints | ❌ | |
 | NFR-06 | Unit & integration tests | 🟡 | `RequireHomeAccessTest`, `FoodServiceTest`, `ErrorAdviserControllerTest`, `HomeScopingRepositoryTest` (H2). `contextLoads()` needs a real DB |
-| NFR-07 | Schema migrations (Flyway/Liquibase) instead of `ddl-auto: update` | ❌ | `ddl-auto: update` never changes an existing column type. Until migrations exist, run by hand: `ALTER TABLE waterworks ALTER COLUMN service_charge TYPE numeric(12,2), ALTER COLUMN vat TYPE numeric(12,2), ALTER COLUMN total TYPE numeric(12,2);` |
+| NFR-07 | Schema migrations (Flyway/Liquibase) instead of `ddl-auto: update` | ❌ | `ddl-auto: update` never changes an existing column type. Until migrations exist, run by hand: `ALTER TABLE waterworks ALTER COLUMN service_charge TYPE numeric(12,2), ALTER COLUMN vat TYPE numeric(12,2), ALTER COLUMN total TYPE numeric(12,2);` and, if the `electricity` table already exists, `ALTER TABLE electricity ALTER COLUMN ft_rate TYPE numeric(10,4);` (Hibernate created it with 2 decimal places) |
 | NFR-08 | API documentation (OpenAPI/Swagger) | ❌ | |
 | NFR-09 | Health/readiness probes | ✅ | Actuator probes enabled |
 | NFR-10 | CI build, Sonar, Trivy scan | ✅ | `ci/Jenkinsfile` |
@@ -167,7 +167,7 @@ All resource endpoints live under `/homes/{homeId}/...` and must verify the call
 1. **Fix critical bugs** — NPE on missing account outside home resources (FR-ACC-04), inventory sort (FR-INV-01). ~~Home-scoping~~, ~~homes overwritten~~, ~~error status codes~~ done.
 2. **Complete Home management** — FR-HOME-02..08 (detail, update, delete, members).
 3. **Permissions** — FR-PERM-01..03 (fix entity mapping first).
-4. **Finish bill modules** — Waterworks CRUD, then Electricity CRUD.
+4. ~~**Finish bill modules**~~ done.
 5. **Validation + tests** — NFR-02, NFR-06.
 6. **Dashboard, notifications** once scope is confirmed.
 
