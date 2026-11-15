@@ -37,6 +37,7 @@ Smarthome API is a home ERP backend (Spring Boot + PostgreSQL, OAuth2/JWT resour
 | Warranty | `/homes/{homeId}/warranties` | ✅ | Full CRUD, scoped to home |
 | Waterworks bill | `/homes/{homeId}/waterworks` | ✅ | Full CRUD, scoped to home |
 | Electricity bill | `/homes/{homeId}/electricity` | ✅ | Full CRUD, scoped to home |
+| Product catalog search | `/products` | ✅ | Global, read-only; rows added directly in the DB |
 | Dashboard / notifications | — | 💡 | Not started |
 | Cross-cutting (validation, errors, tests) | — | 🟡 | See §6 |
 
@@ -146,6 +147,24 @@ All resource endpoints live under `/homes/{homeId}/...` and must verify the call
 |----|-------------|--------|-------|
 | FR-DASH-01 | Home dashboard: counts of expired/near-expiry food, low-stock items, expiring warranties, latest bills | 💡 | |
 | FR-NOTI-01 | Notify members of food expiring, low stock, warranty expiring | 💡 | |
+
+### 5.8 Product catalog (global)
+
+Master data for the add-item search box in Food and Inventory. Not scoped to a home; any signed-in user can search it. Rows are maintained **directly in the database** (no create/update API).
+
+| ID | Requirement | Status | Notes |
+|----|-------------|--------|-------|
+| FR-PROD-01 | Search catalog: `GET /products?type=FOOD\|INVENTORY&q=<text>` | ✅ | `q` matches name (contains, case-insensitive) or barcode (prefix). Exact barcode first, then names starting with `q`, then by name. Max 20. Blank `q` → `[]`. Missing/invalid `type` → 400 |
+| FR-PROD-02 | Picking a result autofills name, brand, unit (and max quantity for inventory) in the add form | ✅ | Autofill only — food/inventory rows keep no link to the product |
+| FR-PROD-03 | Admin API / UI to manage the catalog | 💡 | Today: insert via SQL |
+
+Table `product` (created by Hibernate `ddl-auto: update`): `id`, `name` (required), `brand`, `barcode`, `unit`, `max_quantity` (inventory default), `type` (`FOOD` / `INVENTORY`).
+
+```sql
+INSERT INTO product (name, brand, barcode, unit, max_quantity, type) VALUES
+  ('Fresh Milk 1L', 'Meiji', '8851234567890', 'bottle', NULL, 'FOOD'),
+  ('Dishwashing Liquid 500ml', 'Sunlight', '8859999999999', 'bottle', 3, 'INVENTORY');
+```
 
 ## 6. Cross-cutting / Non-functional
 
