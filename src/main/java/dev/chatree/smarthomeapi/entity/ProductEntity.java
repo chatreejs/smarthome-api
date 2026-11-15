@@ -5,8 +5,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 /**
- * A global catalog item (not scoped to a home) that users can search when adding food or inventory.
- * Rows are maintained directly in the database; there is no API to create or edit them.
+ * A catalog item that users search when they add food or inventory. It belongs to no home.
+ * Admins add and edit rows directly in the database. No endpoint changes them.
  */
 @Entity
 @Data
@@ -31,7 +31,7 @@ public class ProductEntity {
     private String unit;
 
     /**
-     * Default max quantity suggested for inventory items. Unused for food.
+     * The max quantity that the add-inventory form fills in. Food ignores it.
      */
     @Column(name = "max_quantity")
     private Double maxQuantity;

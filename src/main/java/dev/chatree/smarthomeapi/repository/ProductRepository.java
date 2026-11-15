@@ -16,8 +16,9 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
      * Finds products of a type whose name contains the pattern (case-insensitive) or whose barcode starts with it.
      * Exact barcode matches come first, then names that start with the pattern, then the rest by name.
      *
-     * @param query    the raw search text, already trimmed
-     * @param pattern  the search text, lower-cased, with LIKE wildcards escaped by {@code !}
+     * @param query          the trimmed search text, compared to the barcode for an exact match
+     * @param pattern        the trimmed search text in lower case, with {@code !} escaping LIKE wildcards
+     * @param barcodePattern the trimmed search text, with {@code !} escaping LIKE wildcards
      */
     @Query("""
             SELECT p FROM ProductEntity p
