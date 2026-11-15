@@ -41,7 +41,7 @@ class ProductSearchRepositoryTest {
         var result = productService.searchProducts(ProductType.FOOD, "  MILK ");
 
         assertThat(result).extracting(ProductResponse::getName)
-                // names starting with the query first, then the rest, each by name
+                // Names that start with the query come first. Each group is sorted by name.
                 .containsExactly("Milk Powder", "Chocolate Milk", "Fresh Milk");
     }
 

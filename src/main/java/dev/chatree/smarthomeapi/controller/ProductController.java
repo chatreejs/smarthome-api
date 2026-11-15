@@ -18,7 +18,7 @@ import java.util.List;
 import static dev.chatree.smarthomeapi.constant.MessageConstants.LOG_USER_REQUEST_PATTERN;
 
 /**
- * Read-only search over the global product catalog. Any signed-in user can search it.
+ * Searches the product catalog. Any signed-in user can call it, and no endpoint here changes the catalog.
  */
 @Log4j2
 @RestController
